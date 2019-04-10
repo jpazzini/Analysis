@@ -43,7 +43,7 @@ def project(var, cut, weight, samplelist, pd, ntupledir):
             chain[s] = TChain("ntuple/tree")
             for j, ss in enumerate(samples[s]['files']):
                 if not 'data' in s or ('data' in s and ss in pd):
-                    print '- ADDING:',ss
+                    print ('- ADDING:',ss)
                     chain[s].Add(ntupledir + ss + ".root")
             if variable[var]['nbins']>0: hist[s] = TH1F(s, ";"+variable[var]['title'], variable[var]['nbins'], variable[var]['min'], variable[var]['max']) # Init histogram
             else: hist[s] = TH1F(s, ";"+variable[var]['title'], len(variable[var]['bins'])-1, array('f', variable[var]['bins']))
@@ -267,7 +267,7 @@ def drawSignal(hist, sign, log=False):
     # return list of objects created by the draw() function
     return [c1, leg]
 
-def drawRatio(data, bkg):
+def drawRatio(data, bkg, isBkg=True):
     errData = array('d', [1.0])
     errBkg = array('d', [1.0])
     intData = data.IntegralAndError(1, data.GetNbinsX(), errData)
@@ -279,9 +279,9 @@ def drawRatio(data, bkg):
     latex.SetTextColor(1)
     latex.SetTextFont(62)
     latex.SetTextSize(0.08)
-    latex.DrawLatex(0.25, 0.85, "Data/Bkg = %.3f #pm %.3f" % (ratio, error))
-    print "  Ratio:\t%.3f +- %.3f" % (ratio, error)
-    #return [ratio, error]
+    latex.DrawLatex(0.25, 0.85, "%s = %.3f #pm %.3f" % ('Data/Bkg' if isBkg else 'ratio', ratio, error))
+    print ("  Ratio:\t%.3f +- %.3f" % (ratio, error))
+    return ratio, error
 
 def drawKolmogorov(data, bkg):
     latex = TLatex()
@@ -293,16 +293,16 @@ def drawKolmogorov(data, bkg):
 
 def printTable(hist, sign=[]):
     samplelist = [x for x in hist.keys() if not 'data' in x and not 'BkgSum' in x and not x in sign and not x=="files"]
-    print "Sample                  Events          Entries         %"
-    print "-"*80
+    print ("Sample                  Events          Entries         %")
+    print ("-"*80)
     for i, s in enumerate(['data_obs']+samplelist+['BkgSum']):
-        if i==1 or i==len(samplelist)+1: print "-"*80
-        print "%-20s" % s, "\t%-10.2f" % hist[s].Integral(), "\t%-10.0f" % (hist[s].GetEntries()-2), "\t%-10.2f" % (100.*hist[s].Integral()/hist['BkgSum'].Integral()) if hist['BkgSum'].Integral() > 0 else 0, "%"
-    print "-"*80
+        if i==1 or i==len(samplelist)+1: print ("-"*80)
+        print ("%-20s" % s, "\t%-10.2f" % hist[s].Integral(), "\t%-10.0f" % (hist[s].GetEntries()-2), "\t%-10.2f" % (100.*hist[s].Integral()/hist['BkgSum'].Integral()) if hist['BkgSum'].Integral() > 0 else 0, "%")
+    print ("-"*80)
     for i, s in enumerate(sign):
         if not samples[s]['plot']: continue
-        print "%-20s" % s, "\t%-10.2f" % hist[s].Integral(), "\t%-10.0f" % (hist[s].GetEntries()-2), "\t%-10.2f" % (100.*hist[s].GetEntries()/float(hist[s].GetOption())) if float(hist[s].GetOption()) > 0 else 0, "%"    
-    print "-"*80
+        print ("%-20s" % s, "\t%-10.2f" % hist[s].Integral(), "\t%-10.0f" % (hist[s].GetEntries()-2), "\t%-10.2f" % (100.*hist[s].GetEntries()/float(hist[s].GetOption())) if float(hist[s].GetOption()) > 0 else 0, "%"    )
+    print ("-"*80)
 
 ##################
 #     OTHERS     #
@@ -325,7 +325,7 @@ def getNm1Cut(var, cut):
     if ' '+var+'>' in cut: cut = cut.replace(var, "1e99")
     elif ' '+var+'<' in cut: cut = cut.replace(var, "-1e99")
     elif ' '+var+'==' in cut: cut = cut.replace(var+'==', "-9!=")
-    else: print "  unrecognized var '", var ,"' in cut, cannot plot n-1 cut"
+    else: print ("  unrecognized var '", var ,"' in cut, cannot plot n-1 cut")
     return cut
 
 def addOverflow(hist, addUnder=True):

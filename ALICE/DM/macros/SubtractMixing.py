@@ -63,11 +63,11 @@ h_data_mix_roo= {}
 weight        = {}
 data_mix      = {}
 
-print "=== Opening the ws files - Integrated over Centrality"
+print ("=== Opening the ws files - Integrated over Centrality")
 
 file = TFile("../workspaces/ws_C_int.root",'read');
 w = file.Get("w_C");
-print "    Workspace w corresponds to file:", w.GetTitle()
+print ("    Workspace w corresponds to file:", w.GetTitle())
 out_w = RooWorkspace("processed_w_C")
 w.Print()
 
@@ -132,11 +132,11 @@ out_w.Print()
 
 
 
-print "=== Opening the ws files - Fully Integrated"
+print ("=== Opening the ws files - Fully Integrated")
 
 file_Full = TFile("../workspaces/ws_Full.root",'read');
 w_Full = file_Full.Get("w_Full");
-print "    Workspace w corresponds to file:", w_Full.GetTitle()
+print ("    Workspace w corresponds to file:", w_Full.GetTitle())
 out_w_Full = RooWorkspace("processed_w_Full")
 w_Full.Print()
 

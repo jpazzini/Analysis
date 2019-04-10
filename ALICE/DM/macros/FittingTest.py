@@ -9,10 +9,10 @@ from ROOT import RooFormulaVar, RooGenericPdf, RooGaussian, RooExponential, RooP
 
 from drawUtils import *
 
-print 'LOADING CUSTOM PDFs'
+print ('LOADING CUSTOM PDFs')
 rc = gSystem.Load('../pdfs/HWWLVJRooPdfs_cxx.so') 
 if not rc==0:
-  print 'SOMETHING WENT WRONG'
+  print ('SOMETHING WENT WRONG')
   exit()
 
 from ROOT import RooDoubleCrystalBall, RooExpNPdf, RooExpTailPdf, Roo2ExpPdf, RooErfExpPdf
@@ -115,18 +115,24 @@ BkgCombModel   = RooExponential('BkgCombModel','BkgCombModel',mass,constComb)
 # BkgCombModel= RooExpTailPdf('BkgCombModel','BkgCombModel',mass,numBkgComb,denBkgComb)
 
 
-NJPsi     = RooRealVar('NJPsi','NJPsi',1e3,1e1,1e6)
-JPsiModelExt = RooExtendPdf('JPsiModelExt','JPsiModelExt',JPsiModel,NJPsi)
-NPsip     = RooRealVar('NPsip','NPsip',1e1,1e-1,1e4)
-PsipModelExt = RooExtendPdf('PsipModelExt','PsipModelExt',PsipModel,NPsip)
-NBkgComb = RooRealVar('NBkgComb','NBkgComb',  1e6,   1e1,   1e8)
-BkgCombModelExt = RooExtendPdf('BkgCombModelExt','BkgCombModelExt',BkgCombModel,NBkgComb)
+# NJPsi     = RooRealVar('NJPsi','NJPsi',1e3,1e1,1e6)
+# JPsiModelExt = RooExtendPdf('JPsiModelExt','JPsiModelExt',JPsiModel,NJPsi)
+# NPsip     = RooRealVar('NPsip','NPsip',1e1,1e-1,1e4)
+# PsipModelExt = RooExtendPdf('PsipModelExt','PsipModelExt',PsipModel,NPsip)
+# NBkgComb = RooRealVar('NBkgComb','NBkgComb',  1e6,   1e1,   1e8)
+# BkgCombModelExt = RooExtendPdf('BkgCombModelExt','BkgCombModelExt',BkgCombModel,NBkgComb)
+
+
+fJPsi     = RooRealVar('fJPsi','fJPsi',1e-2,1e-3,1e0)
+fPsip     = RooRealVar('fPsip','fPsip',1e-5,1e-6,1e-2)
+
 
 DmeanJPsiPsip.setConstant(True)
 RsigmaJPsiPsip.setConstant(True)
 
 # baseModel = RooAddPdf('baseModel','Test fit model',RooArgList(BkgCombModel,JPsiModel),RooArgList(frac))
-baseModel = RooAddPdf('baseModel','Test fit model',RooArgList(BkgCombModelExt,JPsiModelExt,PsipModelExt),RooArgList(NBkgComb,NJPsi,NPsip))
+# baseModel = RooAddPdf('baseModel','Test fit model',RooArgList(BkgCombModelExt,JPsiModelExt,PsipModelExt),RooArgList(NBkgComb,NJPsi,NPsip))
+baseModel = RooAddPdf('baseModel','Test fit model',RooArgList(JPsiModel,PsipModel,BkgCombModel),RooArgList(fJPsi,fPsip))
 # baseModel = RooAddPdf('baseModel','Test fit model',RooArgList(BkgCombModelExt,JPsiModelExt),RooArgList(NBkgComb,NJPsi))
 fitRes    = baseModel.fitTo(data,
                             RooFit.Extended(True),
@@ -138,9 +144,9 @@ fitRes    = baseModel.fitTo(data,
                             RooFit.NumCPU(12),
                             RooFit.PrintLevel(1 if options.verbose else -1) )
 
-print '=== OVERALL FIT RESULTS ==='
+print ('=== OVERALL FIT RESULTS ===')
 fitRes.Print()
-print '==========================='
+print ('===========================')
 
 RATIO = 3.75
 c = TCanvas('c','c',800,800)
@@ -157,9 +163,12 @@ data_obs = data.plotOn(frame, RooFit.Binning(binsmass), RooFit.DataError(RooAbsD
 baseModel.plotOn(frame, RooFit.LineColor(2), RooFit.Range('rangemass'),RooFit.Name('tot'))
 chi2 = frame.chiSquare(fitRes.floatParsFinal().getSize())
 res  = frame.pullHist()
-baseModel.plotOn(frame, RooFit.LineColor(2), RooFit.LineStyle(2), RooFit.Components('BkgCombModelExt'), RooFit.Range('rangemass'),RooFit.Name('comb'))
-baseModel.plotOn(frame, RooFit.LineColor(4), RooFit.LineStyle(3), RooFit.Components('JPsiModelExt'), RooFit.Range('rangemass'),RooFit.Name('JPsi'))
-baseModel.plotOn(frame, RooFit.LineColor(3), RooFit.LineStyle(4), RooFit.Components('PsipModelExt'), RooFit.Range('rangemass'),RooFit.Name('Psip'))
+# baseModel.plotOn(frame, RooFit.LineColor(2), RooFit.LineStyle(2), RooFit.Components('BkgCombModelExt'), RooFit.Range('rangemass'),RooFit.Name('comb'))
+# baseModel.plotOn(frame, RooFit.LineColor(4), RooFit.LineStyle(3), RooFit.Components('JPsiModelExt'), RooFit.Range('rangemass'),RooFit.Name('JPsi'))
+# baseModel.plotOn(frame, RooFit.LineColor(3), RooFit.LineStyle(4), RooFit.Components('PsipModelExt'), RooFit.Range('rangemass'),RooFit.Name('Psip'))
+baseModel.plotOn(frame, RooFit.LineColor(2), RooFit.LineStyle(2), RooFit.Components('BkgCombModel'), RooFit.Range('rangemass'),RooFit.Name('comb'))
+baseModel.plotOn(frame, RooFit.LineColor(4), RooFit.LineStyle(3), RooFit.Components('JPsiModel'), RooFit.Range('rangemass'),RooFit.Name('JPsi'))
+baseModel.plotOn(frame, RooFit.LineColor(3), RooFit.LineStyle(4), RooFit.Components('PsipModel'), RooFit.Range('rangemass'),RooFit.Name('Psip'))
 # baseModel.plotOn(frame, RooFit.LineColor(2), RooFit.Range('rangemass'),RooFit.Name('Unc'),RooFit.VisualizeError(fitRes,1,False),RooFit.SumW2Error(True),RooFit.FillColor(1),RooFit.FillStyle(3005))
 frame.GetYaxis().SetTitleOffset(1.1)
 frame.Draw()
@@ -217,11 +226,11 @@ for it in pT_bins:
   baseModel = RooAddPdf('baseModel','Test fit model',RooArgList(expComb,gausJPsi),RooArgList(frac))
   fitRes    = baseModel.fitTo(data,RooFit.SumW2Error(True),RooFit.Range('rangemass'),RooFit.Save(1),RooFit.NumCPU(10),RooFit.PrintLevel(-1))
 
-  print '===  pT%s FIT RESULTS ==='%it
+  print ('===  pT%s FIT RESULTS ==='%it)
   fitRes.Print()
-  print '==========================='
-  print ''
-  print ''
+  print ('===========================')
+  print ('')
+  print ('')
 
 
   RATIO = 3.75
